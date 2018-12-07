@@ -84,7 +84,8 @@ class UserAction extends MyAction {
             // 执行退款操作
             if(1) {
                 $ufMod = D('UF');
-                $data['status'] = 5;
+                $data['hb_type'] = 1;
+                $data['hb_time'] = date('Y-m-d H:i:s', time());
                 $where['affair_id'] = $affairId;
                 $where['open_id'] = $openid;
                 $where['status'] = 2;

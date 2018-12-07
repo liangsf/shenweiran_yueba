@@ -331,11 +331,11 @@ class AffairAction extends MyAction {
                     }
               }
 
-              if($ufInfo['status']==2) {
+              if($ufInfo['status']==2 && $ufInfo['hb_type'] == 0) {
                   $btns['getMoney'] = true;
               }
 
-              if($ufInfo['status']==5) {
+              if($ufInfo['hb_type']==1) {
                   $btns['view'] = true;
               }
           }
