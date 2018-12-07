@@ -480,6 +480,7 @@ class TestAction extends Action
     public function xiugai($value='')
     {
         // code...
+        // asdlf
         $data['uuid'] = 1090;
         $ok = M('WxUsers')->where('open_id="ovABH47yJ3yBjub1hBz2WSxKG7VI"')->save($data);
         var_dump($ok);
