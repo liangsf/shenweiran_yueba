@@ -309,7 +309,7 @@ class AffairAction extends MyAction {
               }
           }
 
-          if(($ufInfo['status']==0 && !empty($ufInfo)) && $afInfo['status'] == 0 && $current_time<$active_time) {
+          if(($ufInfo['status']==0 || empty($ufInfo)) && $afInfo['status'] == 0 && $current_time<$active_time) {
               $btns['join'] = true;
           }
 

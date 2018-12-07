@@ -16,7 +16,7 @@ class MemberAction extends MyAction {
         $page = intval($_GET['page']);
         $size = intval($_GET['size']);
         $where['a.affair_id'] = intval($_GET['id']);
-        $where['a.status'] = 1;
+        $where['a.status'] = array('gt', 0);
         $list = $ufModel->search($where, $page, $size);
         // echo M()->getLastSql();
 

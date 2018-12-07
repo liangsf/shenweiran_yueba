@@ -87,11 +87,12 @@ class PayModel extends CommonModel {
 	 */
 	public function refund ($out_trade_no, $affair_info)
 	{
+		$array = array();
+		$array['status'] = false;
+		$array['info'] = '退款失败';
 
-		if(( isset($out_trade_no) && $out_trade_no!='' && !preg_match("/^[0-9a-zA-Z]{10,64}$/i", $out_trade_no, $matches) )) {
-			$array = array();
-			$array['status'] = false;
-			$array['info'] = '退款失败';
+		if(( isset($out_trade_no) && $out_trade_no!='' && preg_match("/^[0-9a-zA-Z]{10,64}$/i", $out_trade_no, $matches) )) {
+
 			//根据商户订单退款
 			try{
 				// $transaction_id = '4200000215201812043375560422';//$_REQUEST["transaction_id"];
