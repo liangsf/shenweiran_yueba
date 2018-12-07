@@ -41,6 +41,7 @@ class MemberAction extends MyAction {
         $where['a.affair_id'] = intval($id);
         $where['_string'] = ' a.status=1 || a.status=3';
         $count = $ufModel->where($where)->count;
+        return $count;
         /*$ufModel = D('UF');
         $page = intval($_GET['page']);
         $size = intval($_GET['size']);
