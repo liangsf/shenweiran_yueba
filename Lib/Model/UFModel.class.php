@@ -47,4 +47,32 @@ class UFModel extends CommonModel {
         return $count;
 	}
 
+	//获取每个人可以分到的钱
+	public function getOneAllotMoney($id)
+	{
+		//获取后台配置扣除的费率
+        $base_info = M('BaseConf')->where('id=1')->find();
+        $cutRate = $base_info['out_fl'];
+
+        //获取活动进信息
+        $affWhere['id'] = $id;
+        $affInfo = M('Affair')->where($affWhere)->find();
+
+        //获取所有迟到的人（没有签到的也算作迟到）
+        $lateCount = $this->latePerson($id);
+
+        //获取所有正常签到的人
+        $signCount = $this->signPerson($id);
+
+        $allLateMoney = $affInfo['promise_money']*$lateCount;
+        $cutMoney = $allLateMoney*$cutRate/100;
+        $useMoney = $allLateMoney-$cutMoney;
+
+        //每个人可以分配的钱
+        $oneMoney = $useMoney/$signCount;
+
+		$oneMoney = sprintf("%.2f",$oneMoney);
+		return $oneMoney;
+	}
+
 }

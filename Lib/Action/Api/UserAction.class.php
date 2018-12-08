@@ -72,37 +72,55 @@ class UserAction extends MyAction {
 
     }
 
-    //领取红包  -- 领取红包退回保证金
+    //领取红包  -- 领取红包（平分迟到的保证金）
     public function receiveCash($value='')
     {
         $affairId = intval($_POST['id']);
         $openid = $this->openid;
-        // code...
-        try {
-            // 执行退款操作
+
+        $ufMod = D('UF');
+
+        $oneMoney = $ufMod->getOneAllotMoney($affairId);
+
+        $param['open_id'] = $openid;
+        $param['affair_id'] = $affairId;
+        $param['hb_type'] = 0;
+        $param['status'] = 2;
+        $order = $ufMod->where($where)->find();
+        if($order) {
+
             // code...
-            // 执行退款操作
-            if(1) {
-                $ufMod = D('UF');
-                $data['hb_type'] = 1;
-                $data['hb_time'] = date('Y-m-d H:i:s', time());
-                $where['affair_id'] = $affairId;
-                $where['open_id'] = $openid;
-                $where['status'] = 2;
-                $isOk = $ufMod->where($where)->save($data);
-                if($isOk) {
-                    $this->ajaxReturn('', '领取成功', 200);
+            try {
+                // 企业转账
+                $redpackstatus = D('WxTrans')->WxTransfers($openid, $oneMoney);
+                // 企业转账
+                if($redpackstatus) {
+
+                    $data['hb_type'] = 1;
+                    $data['hb_time'] = date('Y-m-d H:i:s', time());
+                    $where['affair_id'] = $affairId;
+                    $where['open_id'] = $openid;
+                    $where['status'] = 2;
+                    $isOk = $ufMod->where($where)->save($data);
+                    if($isOk) {
+                        $this->ajaxReturn('', '领取成功', 200);
+                    } else {
+                        $this->ajaxReturn('', '领取失败', 403);
+                    }
                 } else {
-                    $this->ajaxReturn('', '领取失败', 403);
+                    $this->ajaxReturn('', '领取异常', 403);
                 }
-            } else {
-                $this->ajaxReturn('', '退款异常', 403);
+
+
+            } catch (Exception $e) {
+                $this->ajaxReturn('', '退款异常'.$e->getMessage(), 403);
             }
 
-
-        } catch (Exception $e) {
-            $this->ajaxReturn('', '退款异常'.$e->getMessage(), 403);
+        } else {
+            $this->ajaxReturn('', '不符合领取红包的条件', 403);
         }
+
+
 
     }
 
