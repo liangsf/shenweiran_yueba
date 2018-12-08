@@ -38,9 +38,9 @@ class MemberAction extends MyAction {
     private function latePerson($id)
     {
         $ufModel = D('UF');
-        $where['a.affair_id'] = intval($id);
-        $where['_string'] = ' a.status=1 || a.status=3';
-        $count = $ufModel->where($where)->count;
+        $where['affair_id'] = intval($id);
+        $where['_string'] = ' status=1 || status=3';
+        $count = $ufModel->where($where)->count();
         return $count;
         /*$ufModel = D('UF');
         $page = intval($_GET['page']);
@@ -66,9 +66,9 @@ class MemberAction extends MyAction {
     private function signPerson($id)
     {
         $ufModel = D('UF');
-        $where['a.affair_id'] = intval($id);
-        $where['a.status'] = 2;
-        $count = $ufModel->where($where)->count;
+        $where['affair_id'] = intval($id);
+        $where['status'] = 2;
+        $count = $ufModel->where($where)->count();
         return $count;
 
         /*$ufModel = D('UF');
