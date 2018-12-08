@@ -78,7 +78,6 @@ class JssdkAction extends Action {
       $url = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=$this->appId&secret=$this->appSecret";
 
       $res = json_decode($this->httpGet($url));
-
       $access_token = $res->access_token;
       if ($access_token) {
         $data->expire_time = time() + 7000;
@@ -119,7 +118,7 @@ class JssdkAction extends Action {
 	F($filename, $content);
   }
 
-
+/*
   //用户信息获取--以下方法跟以上都不关联
   public function getAccessTokenByCode($code) {
 	// access_token 应该全局存储与更新，以下代码以写入到文件中做示例
@@ -147,7 +146,7 @@ class JssdkAction extends Action {
 	  $url = "https://api.weixin.qq.com/sns/userinfo?access_token=$access_token&openid=$openid&lang=zh_CN";
 	  $res = json_decode($this->httpGet($url));
 	  return $res;
-  }
+  }*/
 
     //发送客服消息
     public function sendCustomerMsg($touser,$content,$type){
@@ -217,8 +216,8 @@ class JssdkAction extends Action {
              return $output;
     }
 
-  //发送客服消息
-    public function sendReplyMsg($touser, $cont){
+        //发送客服模板消息
+public function sendReplyMsg($touser, $cont, $form_id){
 
         $ACC_TOKEN = $this->getAccessToken();
         //oGrPb0vHnfNqPv8fq4vWX9Mulj2c "'.$touser.'",
@@ -227,8 +226,7 @@ class JssdkAction extends Action {
         $data = '{
             "touser":"'.$touser.'",
             "template_id":"7vryoGur4kRE_ATuuU02VK0fkpS6V6kW8J0jB7mnmW4",
-            "url":"'.$url.'",
-            "topcolor":"#FF0000",
+            "form_id":"'.$form_id.'",
             "data":{
                     "keyword1": {
                         "value":"'.$time.'",
@@ -245,50 +243,50 @@ class JssdkAction extends Action {
                 }
             }';
 
-        $url = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=".$ACC_TOKEN;
-        //$url = "https://api.weixin.qq.com/cgi-bin/message/wxopen/template/send?access_token=".$ACC_TOKEN; 小程序模板消息接口
+        //$url = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=".$ACC_TOKEN;
+        $url = "https://api.weixin.qq.com/cgi-bin/message/wxopen/template/send?access_token=".$ACC_TOKEN; //小程序模板消息接口
 
         $result = $this->curl_post($url,$data);
+
         return $result;
 
     }
 
-    //发送记事消息--模板消息
-    public function sendTaskMsg($touser, $title, $cont, $taskTime) {
-        $ACC_TOKEN = $this->getAccessToken();
-        $url = 'http://m.my12399.com/#/msg';
-        $data = '{
-            "touser":"'.$touser.'",
-            "template_id":"7zLQ6iy-KdKBdmsTdIkExdJalEasmW7jP2mGsHH0DDY",
-            "url":"'.$url.'",
-            "topcolor":"#FF0000",
-            "data":{
-                    "first": {
-                        "value":"您好，根据日历安排，您有以下计划",
-                        "color":"#173177"
-                    },
-                    "keyword1": {
-                        "value":"'.$title.'",
-                        "color":"#173177"
-                    },
-                    "keyword2":{
-                        "value":"'.$cont.'",
-                        "color":"#173177"
-                    },
-                    "keyword3":{
-                        "value":"'.$taskTime.'",
-                        "color":"#173177"
-                    },
-                    "remark":{
-                        "value":"请进入系统查看",
-                        "color":"#173177"
-                    }
+//日程模板消息
+public function sendAffairMsg($touser, $form_id, $cont){
+
+    $ACC_TOKEN = $this->getAccessToken();
+    $url = 'http://www.baidu.com';
+    $time = date('Y-m-d H:i:s', time());
+    $data = '{
+        "touser":"'.$touser.'",
+        "template_id":"NAk47nmB6pEtqMrbeN7UV_xvSqa3E6BaxDjpEgUIrr0",
+        "form_id":"'.$form_id.'",
+        "data":{
+                "keyword1": {
+                    "value":"'.$cont['title'].'",
+                    "color":"#173177"
+                },
+                "keyword2": {
+                    "value":"'.$cont['time'].'",
+                    "color":"#173177"
+                },
+                "keyword3":{
+                    "value":"'.$cont['addr'].'",
+                    "color":"#173177"
                 }
-            }';
+            }
+        }';
 
-        $url = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=".$ACC_TOKEN;
-        $result = $this->curl_post($url,$data);
-        return $result;
-    }
+    //$url = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=".$ACC_TOKEN;
+    $url = "https://api.weixin.qq.com/cgi-bin/message/wxopen/template/send?access_token=".$ACC_TOKEN; //小程序模板消息接口
+
+    $result = $this->curl_post($url,$data);
+
+    return $result;
+
+}
+
+
 
 }

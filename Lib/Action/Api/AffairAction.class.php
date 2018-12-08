@@ -304,7 +304,8 @@ class AffairAction extends MyAction {
 
           if($afInfo['open_id'] == $openid && $current_time<$active_time && $afInfo['status'] == 0) {
               $btns['update'] = true;
-              if($current_date == $active_date) {
+              $chae = $active_time - $current_time;
+              if($chae<=7200) {
                   $btns['update'] = false;
               }
           }
@@ -319,14 +320,17 @@ class AffairAction extends MyAction {
                   $btns['update'] = true;
               }
 
-              if($current_date == $active_date) {
+              $chae = $active_time-$current_time;
+              if($chae<=7200) {
                   $btns['update'] = false;
               }
           }
 
           if(!empty($ufInfo)) {
               if($ufInfo['status']==1 && $afInfo['status'] == 0 && $current_time<$active_time) {
-                    if($current_date == $active_date) {
+                  //当距离活动开始还要两小时的时候显示签到
+                  $chae = $active_time - $current_time;
+                    if($chae<=7200) {
                         $btns['sign'] = true;
                     }
               }
