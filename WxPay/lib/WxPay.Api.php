@@ -575,9 +575,8 @@ class WxPayApi
 			$sslKeyPath = "../cert/apiclient_key.pem";
 			//$sslKeyPath = "D:\wamp\www\dong\code\cert\apiclient_key.pem";
 			$config->GetSSLCertPath($sslCertPath, $sslKeyPath);
-			//$sslCertPath = "D:\wamp\www\dong\code\cert\apiclient_cert.pem";
-			//$sslKeyPath = "D:\wamp\www\dong\code\cert\apiclient_key.pem";
-			echo $sslCertPath;exit;
+			$sslCertPath = "D:\wamp\www\dong\code\cert\apiclient_cert.pem";
+			$sslKeyPath = "D:\wamp\www\dong\code\cert\apiclient_key.pem";
 			curl_setopt($ch,CURLOPT_SSLCERTTYPE,'PEM');
 			curl_setopt($ch,CURLOPT_SSLCERT, $sslCertPath);
 			curl_setopt($ch,CURLOPT_SSLKEYTYPE,'PEM');
