@@ -21,7 +21,7 @@ class UFModel extends CommonModel {
 					->field('a.join_time, a.open_id, a.sign_time, a.out_trade_no, a.pay_time, a.status as join_status, u.nickname, u.name, u.avatarurl, u.mobile, af.id, af.active_time, af.close_time, af.address, af.address_Lng, af.address_Lat, af.promise_money, af.quota, af.adr_name, af.title, af.content, af.status')
 					->where($where)
 					->page($page, $pageSize)
-					->order('af.active_time desc')
+					->order('af.active_time asc')
 					->select();
 
 	    return $rs;
