@@ -9,7 +9,7 @@ class WxTransModel extends CommonModel {
 	public function WxTransfers($openid,$money=0)
     {
 
-        $money = 100;//$money*100; //最低1元，单位分
+        $money = $money*100; //最低1元，单位分
 
         $sender = "朽煮";
 
@@ -37,21 +37,33 @@ class WxTransModel extends CommonModel {
 
         $unifiedOrder = simplexml_load_string($res, 'SimpleXMLElement', LIBXML_NOCDATA);
 
+		$res = array();
+		$res['data'] = '';
+		$res['status'] = false;
+		$res['info'] = '领取失败';
         if ($unifiedOrder === false) {
             //die('parse xml error');
-			return false;
+			return $res;
         }
         if ($unifiedOrder->return_code != 'SUCCESS') {
             //die($unifiedOrder->return_msg);
-			return false;
+			$res['info'] = '领取失败';
+			return $res;
         }
         if ($unifiedOrder->result_code != 'SUCCESS') {
             //die($unifiedOrder->err_code);
-			return false;
+			$res['info'] = $unifiedOrder->err_code_des;
+			return $res;
         }
 
         //print_R($unifiedOrder);
-        return true;
+		$data['payment_no'] = $unifiedOrder->payment_no;
+		$data['payment_time'] = $unifiedOrder->payment_time;
+		$data['partner_trade_no'] = $unifiedOrder->partner_trade_no;
+		$res['data'] = $data;
+		$res['info'] = '领取成功';
+		$res['status'] = true;
+        return $res;
 
 
     }

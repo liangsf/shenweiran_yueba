@@ -80,7 +80,19 @@ class UserAction extends MyAction {
 
         $ufMod = D('UF');
 
-        $oneMoney = $ufMod->getOneAllotMoney($affairId);
+        $oneMoneyRes = $ufMod->getOneAllotMoney($affairId);
+        if($oneMoneyRes['status'] == 0) {
+            $this->ajaxReturn('', '活动还没开始不可以领取红包', 403);
+        }
+        if($oneMoneyRes['status'] == 2) {
+            $this->ajaxReturn('', '大家都迟到了，保证金在活动结束后退回', 403);
+        }
+        if($oneMoneyRes['status'] == 3) {
+            $this->ajaxReturn('', '大家准时到达 可喜可贺！', 403);
+        }
+        if($oneMoneyRes['money']<=0) {
+            $this->ajaxReturn('', '没有可分配的红包', 403);
+        }
 
         $param['open_id'] = $openid;
         $param['affair_id'] = $affairId;
@@ -92,9 +104,22 @@ class UserAction extends MyAction {
             // code...
             try {
                 // 企业转账
-                $redpackstatus = D('WxTrans')->WxTransfers($openid, $oneMoney);
+                $redpackstatus = D('WxTrans')->WxTransfers($openid, $oneMoneyRes['money']);
+
+
                 // 企业转账
-                if($redpackstatus) {
+                if($redpackstatus['status'] == true) {
+                    //增加支付记录
+                    $tsMod = D('Transaction');
+                    $tsData['open_id'] = $openid;
+                    $tsData['affair_id'] = $affairId;
+                    $tsData['type'] = 4;
+                    $tsData['cash_fee'] = $oneMoneyRes['money']*100;
+                    $tsData['total_fee'] = $oneMoneyRes['money']*100;
+                    $tsData['out_trade_no'] = $redpackstatus['partner_trade_no'];
+                    $tsData['transaction_id'] = $redpackstatus['payment_no'];
+                    $tsMod->add($tsData);
+
 
                     $data['hb_type'] = 1;
                     $data['hb_time'] = date('Y-m-d H:i:s', time());
@@ -108,7 +133,7 @@ class UserAction extends MyAction {
                         $this->ajaxReturn('', '领取失败', 403);
                     }
                 } else {
-                    $this->ajaxReturn('', '领取异常', 403);
+                    $this->ajaxReturn('', $redpackstatus['info'], 403);
                 }
 
 

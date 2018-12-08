@@ -50,19 +50,41 @@ class UFModel extends CommonModel {
 	//获取每个人可以分到的钱
 	public function getOneAllotMoney($id)
 	{
+		$arr = array();
+		$arr['status'] = 1;	//1 领取迟到红包。 2 所有人都迟到了。扣除一定费率 原路退回 3大家都准时到了没有红包可以领
+		$arr['money'] = 0;
+
+		//获取活动进信息
+		$affWhere['id'] = $id;
+		$affInfo = D('Affair')->where($affWhere)->find();
+		$active_time = strtotime($affInfo['active_time']);
+
+		if($active_time>=time()) {
+			//活动没有开始不可以领取红包
+			$arr['status'] = 0;
+			return $arr;
+		}
+
 		//获取后台配置扣除的费率
         $base_info = M('BaseConf')->where('id=1')->find();
         $cutRate = $base_info['out_fl'];
 
-        //获取活动进信息
-        $affWhere['id'] = $id;
-        $affInfo = M('Affair')->where($affWhere)->find();
+
 
         //获取所有迟到的人（没有签到的也算作迟到）
         $lateCount = $this->latePerson($id);
+		if($lateCount<=0) {
+			$arr['status'] = 3;
+			return $arr;
+		}
 
         //获取所有正常签到的人
         $signCount = $this->signPerson($id);
+		if($signCount<=0) {
+			//所有人都迟到了。不费钱。 扣除一定比例（单独定义） 领取红包
+			$cutRate = $base_info['all_late_rate'];
+			$arr['status'] = 2;
+		}
 
         $allLateMoney = $affInfo['promise_money']*$lateCount;
         $cutMoney = $allLateMoney*$cutRate/100;
@@ -72,7 +94,8 @@ class UFModel extends CommonModel {
         $oneMoney = $useMoney/$signCount;
 
 		$oneMoney = sprintf("%.2f",$oneMoney);
-		return $oneMoney;
+		$arr['money'] = $oneMoney;
+		return $arr;
 	}
 
 }
