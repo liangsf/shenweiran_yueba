@@ -34,61 +34,7 @@ class MemberAction extends MyAction {
 
     }
 
-    //获取迟到的人
-    private function latePerson($id)
-    {
-        $ufModel = D('UF');
-        $where['affair_id'] = intval($id);
-        $where['_string'] = ' status=1 || status=3';
-        $count = $ufModel->where($where)->count();
-        return $count;
-        /*$ufModel = D('UF');
-        $page = intval($_GET['page']);
-        $size = intval($_GET['size']);
-        $where['a.affair_id'] = intval($_GET['id']);
-        $where['_string'] = ' a.status=1 || a.status=3';
-        $wehre['hb_type'] = 1;
-        $list = $ufModel->search($where, $page, $size);
 
-        if(strpos($rs['avatarurl'], 'http') === FALSE ) {
-            $rs['avatarurl'] = C('SITEURL').$rs['avatarurl'];
-        }
-
-        foreach ($list as $key => $value) {
-            if(strpos($value['avatarurl'], 'http') === FALSE ) {
-                $list[$key]['avatarurl'] = C('SITEURL').$value['avatarurl'];
-            }
-        }
-        $this->ajaxReturn($list, '', 200);*/
-    }
-
-    //获取成功签到的人
-    private function signPerson($id)
-    {
-        $ufModel = D('UF');
-        $where['affair_id'] = intval($id);
-        $where['status'] = 2;
-        $count = $ufModel->where($where)->count();
-        return $count;
-
-        /*$ufModel = D('UF');
-        $page = intval($_GET['page']);
-        $size = intval($_GET['size']);
-        $where['a.affair_id'] = intval($_GET['id']);
-        $where['a.status'] = 2;
-        $list = $ufModel->search($where, $page, $size);
-
-        if(strpos($rs['avatarurl'], 'http') === FALSE ) {
-            $rs['avatarurl'] = C('SITEURL').$rs['avatarurl'];
-        }
-
-        foreach ($list as $key => $value) {
-            if(strpos($value['avatarurl'], 'http') === FALSE ) {
-                $list[$key]['avatarurl'] = C('SITEURL').$value['avatarurl'];
-            }
-        }
-        $this->ajaxReturn($list, '', 200);*/
-    }
 
     //获取成功签到的人
     public function hongbao()
@@ -113,8 +59,8 @@ class MemberAction extends MyAction {
             }
         }
 
-        $arr['signCount'] = $this->signPerson(intval($_GET['id']));
-        $arr['lateCount'] = $this->latePerson(intval($_GET['id']));
+        $arr['signCount'] = $ufModel->signPerson(intval($_GET['id']));
+        $arr['lateCount'] = $ufModel->latePerson(intval($_GET['id']));
         $arr['list'] = $list;
         $this->ajaxReturn($arr, '', 200);
     }
