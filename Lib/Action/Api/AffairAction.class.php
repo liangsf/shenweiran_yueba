@@ -67,8 +67,10 @@ class AffairAction extends MyAction {
         $where['id'] = $id;
 
         $info = $affairMod->where($where)->find();
-        $personList = $this->getJoinAffairPersonCount($id, 1);    //获取所有报名成功的人
-        $info['all_promise_money'] = $info['promise_money']*count($personList);
+        //$personList = $this->getJoinAffairPersonCount($id, 1);    //获取所有报名成功的人
+        //$info['all_promise_money'] = $info['promise_money']*count($personList);
+
+
 
         //获取提醒时间
         $notice_where['open_id'] = strval($this->openid);
@@ -76,6 +78,8 @@ class AffairAction extends MyAction {
         $noticeRs = D('Notice')->where($notice_where)->find();
 
         $info['notice'] = $noticeRs['notice'];
+
+        $info = $this->getWaitAllot($info, false);
 
         $this->ajaxReturn($info, 'ok', 200);
     }
@@ -142,7 +146,7 @@ class AffairAction extends MyAction {
         // }
         if(isset($data['status'])) {
             if($data['status'] == 0) {
-                $where['af.active_time'] = array('gt', date('Y-m-d H:i:s', time()));
+                $where['af.active_time'] = array('lt', date('Y-m-d H:i:s', time()));
             }
             $where['af.status'] = $data['status'];
         }
@@ -154,6 +158,7 @@ class AffairAction extends MyAction {
 
                 $awhere['a.open_id'] = strval($this->openid);
                 $list = D('Affair')->search($awhere, $page, $size);
+                $list = $this->getWaitAllot($list);
                 $this->ajaxReturn($list, '', 200);
             } else {
                 $where['_string'] =  ' af.open_id != a.open_id ';
@@ -163,7 +168,32 @@ class AffairAction extends MyAction {
 
         $list = $ufModel->search($where, $page, $size);
 
+        $list = $this->getWaitAllot($list);
+
         $this->ajaxReturn($list, '', 200);
+    }
+
+    private function getWaitAllot($list, $isList=true)
+    {
+        $ufMod = D('UF');
+
+        if($isList) {
+            foreach ($list as $key => $value) {
+                // code...
+                $money = $ufMod->getOneAllotMoney($value['id']);
+                $value['wait_allot_money'] = $money['money'];
+                $list[$key] = $value;
+            }
+            return $list;
+        } else{
+
+            $money = $ufMod->getOneAllotMoney($list['id']);
+            $list['wait_allot_money'] = $money['money'];
+
+            return $list;
+
+        }
+
     }
 
     //即将开始的聚会   状态等于进行中 且 开始时间大于当前时间的活动
@@ -179,8 +209,10 @@ class AffairAction extends MyAction {
         $where['a.open_id'] = strval($this->openid);
         $where['af.active_time'] = array('gt', date('Y-m-d H:i:s', time()));
         $where['af.status'] = 0;
+        $where['a.status'] = array('eq', 1);
 
         $list = $ufModel->search($where, $page, $size);
+        $list = $this->getWaitAllot($list);
 
         $this->ajaxReturn($list, '', 200);
     }
@@ -335,11 +367,11 @@ class AffairAction extends MyAction {
                     }
               }
 
-              if($ufInfo['status']==2 && $ufInfo['hb_type'] == 0) {
+              if($ufInfo['status']==2 && $ufInfo['hb_type'] == 0 && $current_time>$active_time) {
                   $btns['getMoney'] = true;
               }
 
-              if($ufInfo['hb_type']==1) {
+              if($ufInfo['hb_type']==1 && $current_time>$active_time) {
                   $btns['view'] = true;
               }
           }
