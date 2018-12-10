@@ -37,6 +37,28 @@ class UFModel extends CommonModel {
         return $count;
 	}
 
+	//后去成功领取红包的人
+	public function getRedPack($id)
+	{
+		$ufModel = D('UF');
+        $where['affair_id'] = intval($id);
+        $where['status'] = 2;
+        $where['hb_type'] = 1;
+        $count = $ufModel->where($where)->count();
+        return $count;
+	}
+
+	//获取所有参与的人
+	public function joinPerson($id)
+	{
+		$ufModel = D('UF');
+        $where['affair_id'] = intval($id);
+        $where['status'] = array('gt', 0);
+        // $where['pay_type'] = array('gt', 0);
+        $count = $ufModel->where($where)->count();
+        return $count;
+	}
+
 	//获取迟到的人
     public function latePerson($id)
     {

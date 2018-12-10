@@ -98,7 +98,7 @@ class PayModel extends CommonModel {
 				// $transaction_id = '4200000215201812043375560422';//$_REQUEST["transaction_id"];
 				$out_trade_no = $out_trade_no;
 				$total_fee = $affair_info['promise_money']*100;//$_REQUEST["total_fee"];
-				$refund_fee = $affair_info['promise_money']*100;// $_REQUEST["refund_fee"];
+				$refund_fee = $affair_info['refund_fee']*100;// $_REQUEST["refund_fee"];
 				$input = new WxPayRefund();
 				// $input->SetTransaction_id($transaction_id);
 				$input->SetOut_trade_no($out_trade_no);
@@ -132,7 +132,7 @@ class PayModel extends CommonModel {
 						return $array;
 					}
 				} else {
-					$array['info'] = $rs['err_code_des'];
+					$array['info'] = $rs['err_code_des']?$rs['err_code_des']:'退款异常';
 					return $array;
 				}
 			} catch(Exception $e) {

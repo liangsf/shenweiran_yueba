@@ -150,10 +150,28 @@ class MemberAction extends MyAction {
                     $updata['pay_type'] = 2;
                     //执行退款
                     $payMod = D('Pay');
+
+                    //获取签到退款扣除的费率
+                    $join_fl = $base_info['join_fl'];
+                    $cutMoney = $info['promise_money']*$join_fl/100;
+                    $info['refund_fee'] = $info['promise_money']-$cutMoney;
+                    $info['refund_fee'] = sprintf("%.2f",$info['refund_fee']);
+                    //获取签到退款扣除的费率
+
                     $pay_resault = $payMod->refund($info['out_trade_no'], $info);
                     //执行退款
                     if($pay_resault['status']) {
                         $upok = $ufMod->where($ufwhere)->save($updata);
+
+
+                        //检测活动 符合条件 关闭活动
+                        $affMod = D('Affair');
+                        $canClose = $affMod->checkAffair($affairId);
+                        if($canClose) {
+                            $affMod->closeAffair($affairId);
+                        }
+                        //检测活动 符合条件 关闭活动
+
                         $this->ajaxReturn($upok, '签到成功', 200);
                     } else {
                         $this->ajaxReturn($upok, $pay_resault['info'], 403);

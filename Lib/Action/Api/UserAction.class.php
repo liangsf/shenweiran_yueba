@@ -128,6 +128,14 @@ class UserAction extends MyAction {
                     $where['status'] = 2;
                     $isOk = $ufMod->where($where)->save($data);
                     if($isOk) {
+                        //检测活动 符合条件 关闭活动
+                        $affMod = D('Affair');
+                        $canClose = $affMod->checkAffair($affairId);
+                        if($canClose) {
+                            $affMod->closeAffair($affairId);
+                        }
+                        //检测活动 符合条件 关闭活动
+
                         $this->ajaxReturn('', '领取成功', 200);
                     } else {
                         $this->ajaxReturn('', '领取失败', 403);
