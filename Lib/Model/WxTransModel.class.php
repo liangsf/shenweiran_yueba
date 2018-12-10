@@ -35,7 +35,8 @@ class WxTransModel extends CommonModel {
 
         $res = $this->pay($url, $obj2);
 
-        $unifiedOrder = simplexml_load_string($res, 'SimpleXMLElement', LIBXML_NOCDATA);
+        // $unifiedOrder = simplexml_load_string($res, 'SimpleXMLElement', LIBXML_NOCDATA);
+		$unifiedOrder = json_decode(json_encode(simplexml_load_string($res, 'SimpleXMLElement', LIBXML_NOCDATA)), true);
 
 		$res = array();
 		$res['data'] = '';
@@ -45,21 +46,21 @@ class WxTransModel extends CommonModel {
             //die('parse xml error');
 			return $res;
         }
-        if ($unifiedOrder->return_code != 'SUCCESS') {
+        if ($unifiedOrder['return_code'] != 'SUCCESS') {
             //die($unifiedOrder->return_msg);
 			$res['info'] = '领取失败';
 			return $res;
         }
-        if ($unifiedOrder->result_code != 'SUCCESS') {
+        if ($unifiedOrder['result_code'] != 'SUCCESS') {
             //die($unifiedOrder->err_code);
-			$res['info'] = $unifiedOrder->err_code_des;
+			$res['info'] = $unifiedOrder['err_code_des'];
 			return $res;
         }
 
         //print_R($unifiedOrder);
-		$data['payment_no'] = $unifiedOrder->payment_no;
-		$data['payment_time'] = $unifiedOrder->payment_time;
-		$data['partner_trade_no'] = $unifiedOrder->partner_trade_no;
+		$data['payment_no'] = $unifiedOrder['payment_no'];
+		$data['payment_time'] = $unifiedOrder['payment_time'];
+		$data['partner_trade_no'] = $unifiedOrder['partner_trade_no'];
 		$res['data'] = $data;
 		$res['info'] = '领取成功';
 		$res['status'] = true;

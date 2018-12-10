@@ -99,7 +99,7 @@ class AffairAction extends MyAction {
         $affairMod = D('Affair');
 
         //设置提醒
-        if(isset($data['notice'])) {
+        if(isset($data['notice']) && $data['notice']>0) {
             $count = $affairMod->where($where)->count();
             $Notice = D('Notice');
             $notice_arr = array();
@@ -125,7 +125,7 @@ class AffairAction extends MyAction {
         if($ok) {
             $this->ajaxReturn(['id'=>$data['id']], '修改成功', 200);
         } else {
-            $this->ajaxReturn('fail', '活动一开始不可以修改', 402);
+            $this->ajaxReturn('fail', '活动已开始不可以修改', 402);
         }
 
     }
@@ -222,8 +222,8 @@ class AffairAction extends MyAction {
     public function cancelAffair()
     {
 
-        $tranMod = new Model(); //事物
-        $tranMod->startTrans();
+        //$tranMod = new Model(); //事物
+        //$tranMod->startTrans();
 
         $affairId = intval($_POST['id']);
         $affairMod = D('Affair');
@@ -248,6 +248,11 @@ class AffairAction extends MyAction {
 
 
         if($isOk) {
+
+            //增加申请取消记录
+            $applyData['open_id'] = $this->openid;
+            $applyData['affair_id'] = $affairId;
+            M('AffairCancelApply')->add($applyData);
 
             $this->ajaxReturn('', '取消成功', 200);
             /*$ufMod = D('UF');
@@ -321,7 +326,7 @@ class AffairAction extends MyAction {
           $current_date = date('Y-m-d', $current_time);
           $active_date = date('Y-m-d', $active_time);
 
-          if($current_time<$active_time) {
+          if($current_time<$active_time && $afInfo['status'] == 0) {
               $btns['extend'] = true;
           }
 
@@ -371,7 +376,7 @@ class AffairAction extends MyAction {
                   $btns['getMoney'] = true;
               }
 
-              if($ufInfo['hb_type']==1 && $current_time>$active_time) {
+              if($current_time>$active_time) {
                   $btns['view'] = true;
               }
           }

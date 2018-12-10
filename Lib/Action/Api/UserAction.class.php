@@ -116,8 +116,8 @@ class UserAction extends MyAction {
                     $tsData['type'] = 4;
                     $tsData['cash_fee'] = $oneMoneyRes['money']*100;
                     $tsData['total_fee'] = $oneMoneyRes['money']*100;
-                    $tsData['out_trade_no'] = $redpackstatus['partner_trade_no'];
-                    $tsData['transaction_id'] = $redpackstatus['payment_no'];
+                    $tsData['out_trade_no'] = $redpackstatus['data']['partner_trade_no'];
+                    $tsData['transaction_id'] = $redpackstatus['data']['payment_no'];
                     $tsMod->add($tsData);
 
 
