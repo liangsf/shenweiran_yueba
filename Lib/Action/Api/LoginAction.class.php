@@ -32,17 +32,6 @@ class LoginAction extends MyAction {
 
     }
 
-    public function demo() {
-
-        var_dump($_POST);
-
-        echo '---------';
-
-        var_dump($_GET);
-
-        echo '-----------';
-
-    }
 
     public function login(){
         //$json = file_get_contents('php://input', 'r');
@@ -52,7 +41,11 @@ class LoginAction extends MyAction {
 
         $userMod = D('User');
 
+        //生成uuid    12位
+        $charid = md5(uniqid(mt_rand(), true));
+        $uuid = 'xz'.substr($charid, 8, 5).substr($charid,16, 5);
 
+        $data['uuid'] = $uuid;
         $data['nickname'] = strval($data['nickName']);
         $data['open_id'] = strval($this->openid);
         $data['city'] = strval($data['city']);
