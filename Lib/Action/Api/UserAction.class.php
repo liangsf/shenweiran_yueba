@@ -104,6 +104,7 @@ class UserAction extends MyAction {
             // code...
             try {
                 // 企业转账
+                $oneMoneyRes['money'] = sprintf("%.2f",$oneMoneyRes['money']);
                 $redpackstatus = D('WxTrans')->WxTransfers($openid, $oneMoneyRes['money']);
 
 
@@ -118,6 +119,7 @@ class UserAction extends MyAction {
                     $tsData['total_fee'] = $oneMoneyRes['money']*100;
                     $tsData['out_trade_no'] = $redpackstatus['data']['partner_trade_no'];
                     $tsData['transaction_id'] = $redpackstatus['data']['payment_no'];
+                    $tsData['wx_response'] = $redpackstatus['data']['wx_response'];
                     $tsMod->add($tsData);
 
 

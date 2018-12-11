@@ -74,6 +74,7 @@ class NotifyAction extends Action {
             $tsData['trade_type'] = $data['trade_type'];
             $tsData['transaction_id'] = $data['transaction_id'];
             $tsData['time_end'] = $data['time_end'];
+            $tsData['wx_response'] = json_encode($data);
 
             $tsMod->add($tsData);
         }

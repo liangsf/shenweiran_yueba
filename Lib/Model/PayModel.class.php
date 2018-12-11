@@ -120,6 +120,8 @@ class PayModel extends CommonModel {
 		            $tsData['out_trade_no'] = $rs['out_trade_no'];
 		            $tsData['trade_type'] = 'JSAPI';
 		            $tsData['transaction_id'] = $rs['transaction_id'];
+		            $tsData['refund_fee'] = $rs['refund_fee'];
+		            $tsData['wx_response'] = json_encode($rs);
 		            $tsData['time_end'] = $affair_info['pay_time'];
 
 		            $ok = $tsMod->add($tsData);

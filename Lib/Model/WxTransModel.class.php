@@ -61,6 +61,7 @@ class WxTransModel extends CommonModel {
 		$data['payment_no'] = $unifiedOrder['payment_no'];
 		$data['payment_time'] = $unifiedOrder['payment_time'];
 		$data['partner_trade_no'] = $unifiedOrder['partner_trade_no'];
+		$data['wx_response'] = json_encode($unifiedOrder);
 		$res['data'] = $data;
 		$res['info'] = '领取成功';
 		$res['status'] = true;
