@@ -66,6 +66,11 @@ class MemberAction extends MyAction {
         $promise_money = 0;
         $res = array();
         foreach($transList as $k=>$v) {
+
+            if(strpos($v['avatarurl'], 'http') === FALSE ) {
+                $v['avatarurl'] = C('SITEURL').$v['avatarurl'];
+            }
+
             if($v['type'] == 2) {
                 $res['join_sign'][] = $v;   //签到并领取准时红包的人员列表
             }
@@ -81,15 +86,18 @@ class MemberAction extends MyAction {
 
         }
 
-        //获取已领取红的人员openid集合
-        $openids = array();
-        foreach($res['get_red_pack'] as $k=>$v){
-            $openids[] = $v['open_id'];
-        }
+        if($latePersonCount!=0) {
+            //没有人迟到 就没有红包可领
+            //获取已领取红的人员openid集合
+            $openids = array();
+            foreach($res['get_red_pack'] as $k=>$v){
+                $openids[] = $v['open_id'];
+            }
 
-        foreach($res['join_sign'] as $k=>$v) {
-            if( !in_array($v['open_id'], $openids) ) {
-                $res['not_get_red_pack'][] = $v;    //未领取红包的人员列表
+            foreach($res['join_sign'] as $k=>$v) {
+                if( !in_array($v['open_id'], $openids) ) {
+                    $res['not_get_red_pack'][] = $v;    //未领取红包的人员列表
+                }
             }
         }
 
@@ -98,7 +106,11 @@ class MemberAction extends MyAction {
         $res['join_sign_count'] = count($res['join_sign']);     //已领准时退款红包个数
         $res['sign_money'] = $res['join_count']*$promise_money/100; //签到准时红包总金额
         $res['late_money'] = $latePersonCount*$afInfo['promise_money']; //总迟到红包金额
-        $res['red_pack_count'] = count($res['join_sign']);  //总红包个数
+        if($latePersonCount!=0) {
+            $res['red_pack_count'] = 0;
+        } else {
+            $res['red_pack_count'] = count($res['join_sign']);  //总红包个数
+        }
         $res['get_red_pack_count'] = count($res['red_pack']);  //领取红包个数
 
 
@@ -229,6 +241,7 @@ class MemberAction extends MyAction {
                     $pay_resault = $payMod->refund($info['out_trade_no'], $info);
                     //执行退款
                     if($pay_resault['status']) {
+                        $updata['refund_money'] = $info['refund_fee'];
                         $upok = $ufMod->where($ufwhere)->save($updata);
 
 

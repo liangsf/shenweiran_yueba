@@ -30,7 +30,7 @@ class MyAction extends Action {
     }
 
     //获取参与活动的人员
-    public function getJoinAffairPersonCount($affairId, $status)
+    protected function getJoinAffairPersonCount($affairId, $status)
     {
         $where['id'] = intval($affairId);
         $where['status'] = intval($status);
@@ -42,6 +42,7 @@ class MyAction extends Action {
     private function addFomrId($form_id)
     {
         $data['form_id'] = $form_id;
+        $data['open_id'] = $this->openid;
         $data['create_time'] = time();
         M('Formids')->add($data);
     }
