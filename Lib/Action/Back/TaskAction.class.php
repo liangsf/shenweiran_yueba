@@ -40,18 +40,15 @@ class TaskAction extends Action {
                 $rs = (array)json_decode($rs);
 
 
-                if($rs['errcode'] != '') {
+                if($rs['errcode'] == '') {
                     //发送成功
                     $formMod->where('id='.$form_rs['id'])->delete();    //删除form_id
                     $save['status'] = 1;
-                    $noticeMod->where('id='.$value['id'])->save($save);
+                    $noticeMod->where('id='.$value['id'])->save($save); //设置已发送
                 } else {
-                    //发送失败
+                    //发送失败  41029 form_id 已经被使用  考虑是否继续发送？
+
                 }
-
-
-                $notDate['status'] = 1;
-                $noticeMod->where('id='.$value['id'])->save($notDate);  //设置已发送
             }
 
         }
@@ -60,18 +57,18 @@ class TaskAction extends Action {
     }
 
     //发送数据并清理form_id
-    private sendMsgAndDelFormId($openid,$cont)
+    private function sendMsgAndDelFormId($openid,$cont)
     {
         $formMod = M('Formids');
         $formWhere['open_id'] = $openid;
         $form_rs = $formMod->where($formWhere)->order('create_time asc')->find();
         $rs = $jssdk->sendAffairMsg($openid, $form_rs['form_id'], $cont);
         $rs = (array)json_decode($rs);
-        if($rs['errcode'] != '') {
+        if($rs['errcode'] == '') {
             //发送成功
             $formMod->where('id='.$form_rs['id'])->delete();    //删除form_id
         } else {
-            //发送失败
+            //发送失败  41029 form_id 已经被使用  考虑是否继续发送？
         }
     }
 
