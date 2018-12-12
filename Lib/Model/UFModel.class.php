@@ -27,6 +27,22 @@ class UFModel extends CommonModel {
 	    return $rs;
 	}
 
+	//获取未领取的保证金
+	public function getPromiseMoney($map)
+	{
+		$money = 0;
+		$where = array();
+		$where = array_merge($where, $map);
+		$money = $this->alias('a')
+					->join(' xz_wx_users as u ON a.open_id = u.open_id')
+					->join(' xz_affairs as af ON a.affair_id = af.id')
+					->field('SUM(af.promise_money) as money')
+					->where($where)
+					->find();
+
+		return $money['money'];
+	}
+
 	//获取成功签到的人
     public function signPerson($id)
     {

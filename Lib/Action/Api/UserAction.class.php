@@ -162,6 +162,10 @@ class UserAction extends MyAction {
 
     public function transLog()
     {
+
+        $page = intval($_GET['page']);
+        $size = intval($_GET['size']);
+
         $openid = $this->openid;
 
         $w['a.open_id'] = $openid;
@@ -170,8 +174,8 @@ class UserAction extends MyAction {
         $w['af.active_time'] = array('gt', date('Y-m-d H:i:s', time()));
         $money = D('UF')->getPromiseMoney($w);   //已支付且未签到 的 未开始并未结束的活动的保证金总和
 
-        $where['t.open_id'] = intval($openid);
-        $transList = D('Transaction')->search($where);
+        $where['t.open_id'] = $openid;
+        $transList = D('Transaction')->search($where, $page, $size);
 
         $res['money'] = $money;
         $res['list'] = $transList;

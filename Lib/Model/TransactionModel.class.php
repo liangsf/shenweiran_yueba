@@ -20,7 +20,7 @@ class TransactionModel extends CommonModel {
 					->field('t.open_id, t.create_time, t.out_trade_no, t.type, t.refund_fee, t.total_fee, u.nickname, u.name, u.avatarurl, u.mobile, af.id, af.active_time, af.close_time, af.address, af.address_Lng, af.address_Lat, af.promise_money, af.quota, af.adr_name, af.title, af.content, af.status, u.uuid')
 					->where($where)
 					->page($page, $pageSize)
-					->order('t.create_time asc')
+					->order('t.create_time desc')
 					->select();
 
 		return $rs;

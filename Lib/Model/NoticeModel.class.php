@@ -6,6 +6,7 @@ class NoticeModel extends CommonModel {
 
 	protected $tableName='affair_notice';
 
+	//设置提醒
 	public function setNotice($data)
     {
         if(!is_array($data) ){
@@ -23,5 +24,20 @@ class NoticeModel extends CommonModel {
         }
         return true;
     }
+
+	//获取提醒的数据
+	public function getNotice($map)
+	{
+		$where = array();
+		$where = array_merge($where, $map);
+
+		$list = $this->alias('n')
+					->join(' xz_affairs as a ON n.affair_id = a.id')
+					->field('n.*, a.title, a.`active_time`, a.`adr_name`')
+					->where($where)
+					->select();
+
+	    return $list;
+	}
 
 }
