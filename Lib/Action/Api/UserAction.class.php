@@ -124,6 +124,7 @@ class UserAction extends MyAction {
 
 
                     $data['hb_type'] = 1;
+                    $data['red_money'] = $oneMoneyRes['money'];
                     $data['hb_time'] = date('Y-m-d H:i:s', time());
                     $where['affair_id'] = $affairId;
                     $where['open_id'] = $openid;
@@ -158,5 +159,26 @@ class UserAction extends MyAction {
 
 
     }
+
+    public function transLog()
+    {
+        $openid = $this->openid;
+
+        $w['a.open_id'] = $openid;
+        $w['a.status'] = 1;
+        $w['af.status'] = 0;
+        $w['af.active_time'] = array('gt', date('Y-m-d H:i:s', time()));
+        $money = D('UF')->getPromiseMoney($w);   //已支付且未签到 的 未开始并未结束的活动的保证金总和
+
+        $where['t.open_id'] = intval($openid);
+        $transList = D('Transaction')->search($where);
+
+        $res['money'] = $money;
+        $res['list'] = $transList;
+
+        $this->ajaxReturn($res, 'ok', 200);
+
+    }
+
 
 }
