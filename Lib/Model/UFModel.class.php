@@ -120,4 +120,73 @@ class UFModel extends CommonModel {
 		return $arr;
 	}
 
+	//获取所有已参与（已支付） 且 没有签到（退款）的人  status=1 && pay_type=1
+	public function joinNoSignPerson($id)
+	{
+		$ufModel = D('UF');
+        $where['affair_id'] = intval($id);
+        $where['status'] = 1;
+        $where['pay_type'] = 1;
+        $count = $ufModel->where($where)->count();
+        return $count;
+	}
+
+	//获取活动待分配的钱
+	public function getWaitAllotMoney($id)
+	{
+		$res = array();
+		$res['status'] = 0;	//1 活动没开始。 2 活动待关闭。 3活动已结束
+		$res['money'] = 0;
+
+		//获取活动进信息
+		$affWhere['id'] = $id;
+		$affInfo = D('Affair')->where($affWhere)->find();
+		$active_time = strtotime($affInfo['active_time']);
+		$current_time = time();
+
+
+		//未开始
+		if( $active_time > $current_time) {
+			//获取所有已支付 且 没有签到（退款）的人  status=1 && pay_type=1
+			$joinNoSignCount = $this->joinNoSignPerson($id);
+			$res['money'] = $joinNoSignCount*$affInfo['promise_money'];
+			$res['status'] = 1;
+			return $res;
+		}
+
+		//待关闭
+		if( $active_time < $current_time && $affInfo['status'] == 0) {
+			//计算所有迟到的保证金 (status=3 || status=1) 减去 已经被领取的钱（hb_type=1）
+			$redPackCount = $this->getRedPack($id);	//领取红包的人
+			$signCount = $this->signPerson($id);	//签到的人
+			$lateCount = $this->latePerson($id);	//迟到的人
+
+			$allMoney = $lateCount*$affInfo['promise_money'];
+			$goneMoney = $allMoney/$signCount*$redPackCount;
+			$res['money'] = $allMoney-$goneMoney;
+
+			$res['money'] = sprintf("%.2f",$res['money']);
+
+			$res['status'] = 2;
+
+			return $res;
+		}
+
+		//活动已结束
+		if( $active_time < $current_time && $affInfo['status'] == 1) {
+
+			$lateCount = $this->latePerson($id);	//迟到的人
+
+			$allMoney = $lateCount*$affInfo['promise_money'];
+			$res['money'] = sprintf("%.2f",$allMoney);
+
+			$res['status'] = 3;
+
+			return $res;
+		}
+
+		return $res;
+
+	}
+
 }

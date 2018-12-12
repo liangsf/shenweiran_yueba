@@ -37,8 +37,76 @@ class MemberAction extends MyAction {
 
 
     //获取成功签到的人
-    public function hongbao()
+    public function hongbao($id)
     {
+
+        $id = intval($id);
+
+        $res = array();
+        $res['join_sign'] = []; //签到并领取准时红包的人员列表
+        $res['join'] = []; //所有参与人列表
+        $res['get_red_pack'] = []; //已领取红包的人员列表
+        $res['not_get_red_pack'] = []; //未领取红包的人员列表
+        $res['join_count'] = 0; //准时红包总个数
+        $res['join_sign_count'] = 0;     //已领准时退款红包个数
+        $res['sign_money'] = 0; //签到准时红包总金额
+        $res['late_money'] = 0; //总迟到红包金额
+        $res['red_pack_count'] = 0;  //总红包个数
+        $res['get_red_pack_count'] = 0;  //领取红包个数
+
+        $where['t.affair_id'] = intval($id);
+        $transList = D('Transaction')->search($where);
+        //echo M()->getLastSql();
+
+        $ufMod = D('UF');
+        $latePersonCount = $ufMod->latePerson($id);
+        //活动基本信息
+        $afInfo = D('Affair')->find($id);
+
+        $promise_money = 0;
+        $res = array();
+        foreach($transList as $k=>$v) {
+            if($v['type'] == 2) {
+                $res['join_sign'][] = $v;   //签到并领取准时红包的人员列表
+            }
+
+            if($v['type'] == 1) {
+                $res['join'][] = $v;    //所有参与人列表
+                $promise_money = $v['total_fee'];
+            }
+
+            if($v['type'] == 4) {
+                $res['get_red_pack'][] = $v;    //已领取红包的人员列表
+            }
+
+        }
+
+        //获取已领取红的人员openid集合
+        $openids = array();
+        foreach($res['get_red_pack'] as $k=>$v){
+            $openids[] = $v['open_id'];
+        }
+
+        foreach($res['join_sign'] as $k=>$v) {
+            if( !in_array($v['open_id'], $openids) ) {
+                $res['not_get_red_pack'][] = $v;    //未领取红包的人员列表
+            }
+        }
+
+
+        $res['join_count'] = count($res['join']);   //准时红包总个数
+        $res['join_sign_count'] = count($res['join_sign']);     //已领准时退款红包个数
+        $res['sign_money'] = $res['join_count']*$promise_money/100; //签到准时红包总金额
+        $res['late_money'] = $latePersonCount*$afInfo['promise_money']; //总迟到红包金额
+        $res['red_pack_count'] = count($res['join_sign']);  //总红包个数
+        $res['get_red_pack_count'] = count($res['red_pack']);  //领取红包个数
+
+
+
+        $this->ajaxReturn($res, 'ok', 200);
+
+        /*
+        //准时签到列表-status=2 && pay_type=2 (需要扣除手续费的钱)  已领红包hb_type=1 && status=2 待领取的hb_type=0 && status=2
         if(isset($_GET['late'])) {
             $where['a.hb_type'] = 1;
         }
@@ -62,7 +130,7 @@ class MemberAction extends MyAction {
         $arr['signCount'] = $ufModel->signPerson(intval($_GET['id']));
         $arr['lateCount'] = $ufModel->latePerson(intval($_GET['id']));
         $arr['list'] = $list;
-        $this->ajaxReturn($arr, '', 200);
+        $this->ajaxReturn($arr, '', 200);*/
     }
 
 

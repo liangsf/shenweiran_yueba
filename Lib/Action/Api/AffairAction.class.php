@@ -180,14 +180,14 @@ class AffairAction extends MyAction {
         if($isList) {
             foreach ($list as $key => $value) {
                 // code...
-                $money = $ufMod->getOneAllotMoney($value['id']);
+                $money = $ufMod->getWaitAllotMoney($value['id']);
                 $value['wait_allot_money'] = $money['money'];
                 $list[$key] = $value;
             }
             return $list;
         } else{
 
-            $money = $ufMod->getOneAllotMoney($list['id']);
+            $money = $ufMod->getWaitAllotMoney($list['id']);
             $list['wait_allot_money'] = $money['money'];
 
             return $list;
@@ -372,7 +372,7 @@ class AffairAction extends MyAction {
                     }
               }
 
-              if($ufInfo['status']==2 && $ufInfo['hb_type'] == 0 && $current_time>$active_time) {
+              if($ufInfo['status']==2 && $ufInfo['hb_type'] == 0 && $current_time>$active_time && $afInfo['status'] == 0) {
                   $btns['getMoney'] = true;
               }
 
