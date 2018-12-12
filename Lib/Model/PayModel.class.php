@@ -122,7 +122,7 @@ class PayModel extends CommonModel {
 		            $tsData['transaction_id'] = $rs['transaction_id'];
 		            $tsData['refund_fee'] = $rs['refund_fee'];
 		            $tsData['wx_response'] = json_encode($rs);
-		            $tsData['time_end'] = $affair_info['pay_time'];
+		            $tsData['time_end'] = date('YmdHis', time());//$affair_info['pay_time'];	//退款时间
 
 		            $ok = $tsMod->add($tsData);
 					if($ok) {
