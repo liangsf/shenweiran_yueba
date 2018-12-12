@@ -33,6 +33,7 @@ class TaskAction extends Action {
                 $formWhere['open_id'] = $value['open_id'];
                 $form_rs = $formMod->where($formWhere)->order('create_time asc')->find();
 
+                $cont['id'] = $value['affair_id'];
                 $cont['title'] = $value['title'];
                 $cont['time'] = $value['active_time'];
                 $cont['addr'] = $value['adr_name'];
@@ -45,9 +46,10 @@ class TaskAction extends Action {
                     $formMod->where('id='.$form_rs['id'])->delete();    //删除form_id
                     $save['status'] = 1;
                     $noticeMod->where('id='.$value['id'])->save($save); //设置已发送
+                    echo '发送成功';
                 } else {
                     //发送失败  41029 form_id 已经被使用  考虑是否继续发送？
-
+                    echo '发送失败'.$rs['errcode'];
                 }
             }
 
@@ -67,8 +69,10 @@ class TaskAction extends Action {
         if($rs['errcode'] == '') {
             //发送成功
             $formMod->where('id='.$form_rs['id'])->delete();    //删除form_id
+            echo '发送成功';
         } else {
             //发送失败  41029 form_id 已经被使用  考虑是否继续发送？
+            echo '发送失败'.$rs['errcode'];
         }
     }
 
@@ -93,6 +97,7 @@ class TaskAction extends Action {
         //echo M()->getLastSql();
 
         foreach($list as $k=>$v) {
+            $cont['id'] = $v['id'];
             $cont['title'] = $v['title'];
             $cont['time'] = $v['active_time'];
             $cont['addr'] = $v['adr_name'];
