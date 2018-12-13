@@ -111,7 +111,7 @@ class MemberAction extends MyAction {
         } else {
             $res['red_pack_count'] = count($res['join_sign']);  //总红包个数
         }
-        $res['get_red_pack_count'] = count($res['red_pack']);  //领取红包个数
+        $res['get_red_pack_count'] = count($res['get_red_pack']);  //领取红包个数
 
 
 
