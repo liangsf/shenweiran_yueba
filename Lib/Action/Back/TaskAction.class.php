@@ -216,6 +216,7 @@ class TaskAction extends Action {
     //部分签到 部分领取红包的 情况 分发迟到红包
     public function sendLateRedpack($countArr, $info, $cutRate=0)
     {
+        $ufMod = D('UF');
 
         $allLateMoney = $info['order_money']*$countArr['lateCount'];
         $cutMoney = $allLateMoney*$cutRate/100;
@@ -226,8 +227,35 @@ class TaskAction extends Action {
 
         // 企业转账
         $oneMoney = sprintf("%.2f",$oneMoney);
-        $redpackstatus = D('WxTrans')->WxTransfers($info['open_id'], $oneMoney, $info['title']);
-        // 企业转账
+
+        $data['hb_type'] = 1;
+        $data['red_money'] = $oneMoney;
+        $data['hb_time'] = date('Y-m-d H:i:s', time());
+        $where['affair_id'] = $info['affair_id'];
+        $where['open_id'] = $info['open_id'];
+        $where['status'] = 2;
+        $where['hb_type'] = 0;
+        $isOk = $ufMod->where($where)->save($data);
+
+        if($isOk) {
+            $redpackstatus = D('WxTrans')->WxTransfers($info['open_id'], $oneMoney, $info['title']);
+            if($redpackstatus['status'] == true) {
+                //增加支付记录
+                $tsMod = D('Transaction');
+                $tsData['open_id'] = $info['open_id'];
+                $tsData['affair_id'] = $info['affair_id'];
+                $tsData['type'] = 4;
+                $tsData['cash_fee'] = $oneMoney*100;
+                $tsData['total_fee'] = $oneMoney*100;
+                $tsData['out_trade_no'] = $redpackstatus['data']['partner_trade_no'];
+                $tsData['transaction_id'] = $redpackstatus['data']['payment_no'];
+                $tsData['wx_response'] = $redpackstatus['data']['wx_response'];
+                $tsMod->add($tsData);
+            }
+        }
+
+
+
 
 
     }
