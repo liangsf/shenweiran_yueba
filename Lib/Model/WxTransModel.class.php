@@ -6,12 +6,12 @@
 
 class WxTransModel extends CommonModel {
 
-	public function WxTransfers($openid,$money=0)
+	public function WxTransfers($openid,$money=0, $title='红包')
     {
 
         $money = $money*100; //最低1元，单位分
 
-        $sender = "朽煮";
+        $sender = "朽箸";
 
         $obj2 = array();
 
@@ -27,7 +27,7 @@ class WxTransModel extends CommonModel {
 
         $obj2['check_name'] = 'NO_CHECK';
         $obj2['amount'] = $money;
-        $obj2['desc'] = $sender."红包";
+        $obj2['desc'] = $sender.$title;
 
 
         $url = "https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers";

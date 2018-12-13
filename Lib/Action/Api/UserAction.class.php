@@ -94,18 +94,20 @@ class UserAction extends MyAction {
             $this->ajaxReturn('', '没有可分配的红包', 403);
         }
 
-        $param['open_id'] = $openid;
-        $param['affair_id'] = $affairId;
-        $param['hb_type'] = 0;
-        $param['status'] = 2;
-        $order = $ufMod->where($where)->find();
+        $param['a.open_id'] = $openid;
+        $param['a.affair_id'] = $affairId;
+        $param['a.hb_type'] = 0;
+        $param['a.status'] = 2;
+        //$order = $ufMod->where($param)->find();
+        $order = $ufMod->search($param);
+        $order = $order[0];
         if($order) {
 
             // code...
             try {
                 // 企业转账
                 $oneMoneyRes['money'] = sprintf("%.2f",$oneMoneyRes['money']);
-                $redpackstatus = D('WxTrans')->WxTransfers($openid, $oneMoneyRes['money']);
+                $redpackstatus = D('WxTrans')->WxTransfers($openid, $oneMoneyRes['money'], $order['title']);
 
 
                 // 企业转账
