@@ -212,6 +212,8 @@ class UFModel extends CommonModel {
 		$sub['redpackCount'] = 0;
 		$sub['lateCount'] = 0;
 		$sub['joinList'] = [];
+		$sub['signList'] = [];
+		$sub['signNoPackList'] = [];
 
 
 		$w['affair_id'] = $id;
@@ -229,6 +231,10 @@ class UFModel extends CommonModel {
 
 			if($v['status'] ==2 && $v['hb_type'] == 1) {
 				$sub['redpackCount']++;
+			}
+
+			if($v['status'] ==2 && $v['hb_type'] == 0) {
+				$sub['signNoPackList']++;
 			}
 
 			if($v['status'] == 1 || $v['status'] == 3) {
