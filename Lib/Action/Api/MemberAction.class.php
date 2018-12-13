@@ -246,11 +246,11 @@ class MemberAction extends MyAction {
 
 
                         //检测活动 符合条件 关闭活动
-                        $affMod = D('Affair');
+                        /*$affMod = D('Affair');
                         $canClose = $affMod->checkAffair($affairId);
                         if($canClose) {
                             $affMod->closeAffair($affairId);
-                        }
+                        }确定不了人数 不可以进行关闭*/
                         //检测活动 符合条件 关闭活动
 
                         $this->ajaxReturn($upok, '签到成功', 200);

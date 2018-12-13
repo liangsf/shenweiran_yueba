@@ -106,6 +106,102 @@ class TaskAction extends Action {
 
     }
 
+    //扫描活动 进行关闭
+    public function checkAndCloseAffair()
+    {
+        //检测活动 符合条件 关闭活动
+        $affMod = D('Affair');
+        // $canClose = $affMod->checkAffair($affairId);
+        // if($canClose) {
+        //     $affMod->closeAffair($affairId);
+        // }
+        //检测活动 符合条件 关闭活动
+
+        //都签到的情况（参与人=签到人 && 活动开始后） || 部分签到的情况（领取红包的人=签到的人 && 签到人>0） || 都迟到的情况（参与人=迟到人）
+
+        //获取已经过时一天的活动
+        $pre_day_time date('Y-m-d H:i:s', strtotime("-1 day"));
+
+        $where['active_time'] = array('lt', $pre_day_time);
+        $where['status'] = 0;
+        $list = $affMod->where($where)->select();
+
+        if(count($list)>0) {
+            $ufMod = D('UF');
+
+            foreach ($list as $key => $value) {
+                // code...
+                $countArr = $ufMod->getAllStatus($value['id']);
+                if( $countArr['signCount'] == $countArr['joinCount'] ) {
+                    //都签到了 直接关闭会议设置会议状态
+                    $affMod->closeAffair($value['id']);
+                }
+
+                if( $countArr['signCount'] == $countArr['redpackCount'] &&  $countArr['signCount']>0 )  {
+                    //部分签到 且 都领取了迟到红包 直接关闭会议
+                    $affMod->closeAffair($value['id']);
+                }
+
+                if( $countArr['signCount'] == 0 && ( $countArr['joinCount'] == $countArr['lateCount'] ) ) {
+                    //没有人签到 都迟到了（没有点击签到的也算迟到） 扣除一定比例的费用返还给用户 并 关闭会议
+
+                    if( count($countArr['joinList']) == $countArr['lateCount']) {
+
+                        foreach($countArr['joinList'] as $lk=>$lv) {
+                            $this->refuncAllLateMoney( $lv );
+                        }
+
+                        $affMod->closeAffair($value['id']);
+                    }
+
+
+                }
+
+            }
+        }
+
+
+    }
+
+    private function refuncAllLateMoney($affair)
+    {
+
+        $info['promise_money'] = $affair['order_money'];
+        $info['refund_fee'] = 0;
+        $info['open_id'] = $affair['open_id'];
+        $info['id'] = $affair['affair_id'];
+        $info['out_trade_no'] = $affair['out_trade_no'];
+
+        //执行退款
+        $payMod = D('Pay');
+        $base_info = M('BaseConf')->where('id=1')->find();
+
+        //获取所有人都迟到扣除的费率
+        $all_late_fl = $base_info['all_late_rate'];
+        $cutMoney = $info['promise_money']*$all_late_fl/100;
+        $info['refund_fee'] = $info['promise_money']-$cutMoney;
+        $info['refund_fee'] = sprintf("%.2f",$info['refund_fee']);
+        //获取签到退款扣除的费率
+
+        $pay_resault = $payMod->refund($info['out_trade_no'], $info);
+        //执行退款
+
+        if($pay_resault['status']) {
+            $updata['pay_type'] = 2;
+            $updata['refund_money'] = $info['refund_fee'];
+            $ufwhere['affair_id'] = $affair['affair_id'];
+            $ufwhere['open_id'] = $affair['open_id'];
+            $upok = $ufMod->where($ufwhere)->save($updata);
+
+
+            return true;
+        } else {
+            return false;
+        }
+
+
+    }
+
 
 
 }

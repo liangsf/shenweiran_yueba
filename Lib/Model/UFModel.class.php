@@ -205,4 +205,39 @@ class UFModel extends CommonModel {
 
 	}
 
+	public function getAllStatus($id)
+	{
+		$sub['signCount'] = 0;
+		$sub['joinCount'] = 0;
+		$sub['redpackCount'] = 0;
+		$sub['lateCount'] = 0;
+		$sub['joinList'] = [];
+
+
+		$w['affair_id'] = $id;
+		$join_affair_list = $this->where($w)->select();
+		foreach($join_affair_list as $k=>$v) {
+
+			if($v['status'] == 2) {
+				$sub['signCount']++;
+			}
+
+			if($v['status'] > 0) {
+				$sub['joinCount']++;
+				$sub['joinList'][] = $v;
+			}
+
+			if($v['status'] ==2 && $v['hb_type'] == 1) {
+				$sub['redpackCount']++;
+			}
+
+			if($v['status'] == 1 || $v['status'] == 3) {
+				$sub['lateCount']++;
+			}
+
+		}
+		return $sub;
+
+	}
+
 }

@@ -42,12 +42,12 @@ class AffairModel extends CommonModel {
         // code...
         $where['id'] = intval($id);
         $where['status'] = 0;
-        //$where['active_time'] = array('gt', date('Y-m-d H:i:s', time()) );
+        $where['active_time'] = array('lt', date('Y-m-d H:i:s', time()) );
         $affairInfo = $this->where($where)->find();
 
         $ufMod = D('UF');
 
-        if(empty($affair_info)) {
+        if(!empty($affairInfo)) {
 
 			$signCount = $ufMod->signPerson($id);	//签到人数
 
@@ -56,7 +56,7 @@ class AffairModel extends CommonModel {
 
             //检查所有签到的人是否都领取了红包
             $getRedCount = $ufMod->getRedPack($id); //所有领取红包的人
-            if( ($signCount == $joinCount) || ($signCount == $getRedCount) ) {
+            if( ($signCount == $joinCount) || ($signCount == $getRedCount && $signCount>0) ) {
                 return true;
             } else {
                 return false;
