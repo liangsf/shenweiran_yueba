@@ -364,7 +364,7 @@ class AffairAction extends MyAction {
           }
 
           if(!empty($ufInfo)) {
-              if($ufInfo['status']==1 && $afInfo['status'] == 0 && $current_time<$active_time) {
+              if($ufInfo['status']==1 && $ufInfo['pay_type']==1 && $afInfo['status'] == 0 && $current_time<$active_time) {
                   //当距离活动开始还要两小时的时候显示签到
                   $chae = $active_time - $current_time;
                     if($chae<=7200) {
