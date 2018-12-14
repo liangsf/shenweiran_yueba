@@ -49,6 +49,9 @@ class TaskAction extends Action {
                     echo '发送成功';
                 } else {
                     //发送失败  41029 form_id 已经被使用  考虑是否继续发送？
+                    if($rs['errcode'] == '41029') {
+                        $formMod->where('id='.$form_rs['id'])->delete();    //清理这个form_id
+                    }
                     echo '发送失败'.$rs['errcode'];
                 }
             }
@@ -72,6 +75,9 @@ class TaskAction extends Action {
             echo '发送成功';
         } else {
             //发送失败  41029 form_id 已经被使用  考虑是否继续发送？
+            if($rs['errcode'] == '41029') {
+                $formMod->where('id='.$form_rs['id'])->delete();    //清理这个form_id
+            }
             echo '发送失败'.$rs['errcode'];
         }
     }
