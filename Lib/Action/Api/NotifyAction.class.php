@@ -56,13 +56,20 @@ class NotifyAction extends Action {
 		}
 
         //设置签到成功
-        $ufData['status'] = 1;  //设置活动状态
+        /*$ufData['status'] = 1;  //设置活动状态
         $ufData['pay_type'] = 1;    //设置支付状态
         $ufData['pay_time'] = date('Y-m-d H:i:s', time());
         $ufData['order_money'] = $data['total_fee']/100;
         $ufWhere['out_trade_no'] = $data['out_trade_no'];
         $ufWhere['open_id'] = $data['openid'];
+        $ok = D('UF')->where($ufWhere)->save($ufData);*/
+        $ufData['pay_type'] = 1;    //设置支付状态
+        $ufData['pay_time'] = date('Y-m-d H:i:s', time());
+        $ufWhere['out_trade_no'] = $data['out_trade_no'];
+        $ufWhere['open_id'] = $data['openid'];
+        $ufWhere['status'] = 1;
         $ok = D('UF')->where($ufWhere)->save($ufData);
+
         if($ok) {
             //增加交易记录
             $tsMod = D('Transaction');

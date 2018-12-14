@@ -167,6 +167,7 @@ class MemberAction extends MyAction {
         //生成订单号
         $tradeNo = "xzpay".date("YmdHis").mt_rand(1000,9999);
         $data['out_trade_no'] = $tradeNo;
+        $data['order_money'] = $affairInfo['promise_money'];
         $rs = $ufModel->where($where)->find();
 
 
@@ -273,6 +274,34 @@ class MemberAction extends MyAction {
 
 
 
+    }
+
+
+    //支付成功更改参与状态
+    public function changeStatus($id)
+    {
+        $id = intval($id);
+        $ufMod = D('UF');
+        $w['affair_id'] = $id;
+        $w['status'] = 0;
+        $w['open_id'] = $this->openid;
+
+        $ufInfo = $ufMod->where($w)->find();
+
+        //设置签到成功
+        $ufData['status'] = 1;  //设置活动状态
+        //$ufData['pay_type'] = 1;    //设置支付状态
+        //$ufData['pay_time'] = date('Y-m-d H:i:s', time());
+        $ufData['order_money'] = $ufInfo['order_money'];
+        $ufWhere['out_trade_no'] = $ufInfo['out_trade_no'];
+        $ufWhere['open_id'] = $data['openid'];
+        $ufWhere['affair_id'] = $id;
+        $ok = $ufMod->where($ufWhere)->save($ufData);
+        if($ok) {
+            $this->ajaxReturn('', '参与成功', 200);
+        } else {
+            $this->ajaxReturn('', '参与失败', 402);
+        }
     }
 
 
