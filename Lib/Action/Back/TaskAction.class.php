@@ -64,6 +64,9 @@ class TaskAction extends Action {
     //发送数据并清理form_id
     private function sendMsgAndDelFormId($openid,$cont)
     {
+        import("yueba.Action.JssdkAction");
+        $jssdk = new JssdkAction(C('WX_AppID'), C('WX_AppSecret'));
+
         $formMod = M('Formids');
         $formWhere['open_id'] = $openid;
         $form_rs = $formMod->where($formWhere)->order('create_time asc')->find();

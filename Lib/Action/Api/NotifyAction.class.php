@@ -85,12 +85,14 @@ class NotifyAction extends Action {
             $tsData['wx_response'] = json_encode($data);
 
             $tsMod->add($tsData);
+
+            exit('<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>');
         }
 
 
         //print_r($data);
 
-        exit('<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>');
+
     }
 
     //查询订单
