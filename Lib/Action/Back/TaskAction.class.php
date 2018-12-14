@@ -31,6 +31,7 @@ class TaskAction extends Action {
 
                 //获取form_id
                 $formWhere['open_id'] = $value['open_id'];
+                $formWhere['form_id'] = array('neq', 'the formId is a mock one');
                 $form_rs = $formMod->where($formWhere)->order('create_time asc')->find();
 
                 $cont['id'] = $value['affair_id'];
@@ -69,6 +70,7 @@ class TaskAction extends Action {
 
         $formMod = M('Formids');
         $formWhere['open_id'] = $openid;
+        $formWhere['form_id'] = array('neq', 'the formId is a mock one');
         $form_rs = $formMod->where($formWhere)->order('create_time asc')->find();
         $rs = $jssdk->sendAffairMsg($openid, $form_rs['form_id'], $cont);
         $rs = (array)json_decode($rs);
@@ -107,7 +109,7 @@ class TaskAction extends Action {
 
         foreach($list as $k=>$v) {
             $cont['id'] = $v['id'];
-            $cont['title'] = $v['title'];
+            $cont['title'] = $v['title'].":马上开始，记得签到";
             $cont['time'] = $v['active_time'];
             $cont['addr'] = $v['adr_name'];
             $this->sendMsgAndDelFormId($v['open_id'], $cont);
