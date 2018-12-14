@@ -294,7 +294,7 @@ class MemberAction extends MyAction {
         //$ufData['pay_time'] = date('Y-m-d H:i:s', time());
         $ufData['order_money'] = $ufInfo['order_money'];
         $ufWhere['out_trade_no'] = $ufInfo['out_trade_no'];
-        $ufWhere['open_id'] = $data['openid'];
+        $ufWhere['open_id'] = $this->openid;;
         $ufWhere['affair_id'] = $id;
         $ok = $ufMod->where($ufWhere)->save($ufData);
         if($ok) {
