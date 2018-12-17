@@ -4,7 +4,7 @@
 // 本类由系统自动生成，仅供测试用途
 class IndexAction extends MyAction {
     public function index(){
-        reutn false;
+        return false;
         //echo Util::getHttpHeader(Constants::WX_HEADER_CODE);
         // echo WX_HEADER_CODE;
     	// $this->show('thanks');
