@@ -107,47 +107,53 @@ class UserAction extends MyAction {
             try {
                 // 企业转账
                 $oneMoneyRes['money'] = sprintf("%.2f",$oneMoneyRes['money']);
-                $redpackstatus = D('WxTrans')->WxTransfers($openid, $oneMoneyRes['money'], $order['title']);
 
-
-                // 企业转账
-                if($redpackstatus['status'] == true) {
-                    //增加支付记录
-                    $tsMod = D('Transaction');
-                    $tsData['open_id'] = $openid;
-                    $tsData['affair_id'] = $affairId;
-                    $tsData['type'] = 4;
-                    $tsData['cash_fee'] = $oneMoneyRes['money']*100;
-                    $tsData['total_fee'] = $oneMoneyRes['money']*100;
-                    $tsData['out_trade_no'] = $redpackstatus['data']['partner_trade_no'];
-                    $tsData['transaction_id'] = $redpackstatus['data']['payment_no'];
-                    $tsData['wx_response'] = $redpackstatus['data']['wx_response'];
-                    $tsMod->add($tsData);
-
-
-                    $data['hb_type'] = 1;
-                    $data['red_money'] = $oneMoneyRes['money'];
-                    $data['hb_time'] = date('Y-m-d H:i:s', time());
-                    $where['affair_id'] = $affairId;
-                    $where['open_id'] = $openid;
-                    $where['status'] = 2;
-                    $isOk = $ufMod->where($where)->save($data);
-                    if($isOk) {
-                        //检测活动 符合条件 关闭活动
-                        $affMod = D('Affair');
-                        $canClose = $affMod->checkAffair($affairId);
-                        if($canClose) {
-                            $affMod->closeAffair($affairId);
-                        }
-                        //检测活动 符合条件 关闭活动
-
-                        $this->ajaxReturn('', '领取成功', 200);
-                    } else {
-                        $this->ajaxReturn('', '领取失败', 403);
+                //先更改状态，确保状态更改后再转账
+                $data['hb_type'] = 1;
+                $data['red_money'] = $oneMoneyRes['money'];
+                $data['hb_time'] = date('Y-m-d H:i:s', time());
+                $where['affair_id'] = $affairId;
+                $where['open_id'] = $openid;
+                $where['status'] = 2;
+                $where['hb_type'] = 0;
+                $isOk = $ufMod->where($where)->save($data);
+                if($isOk) {
+                    //检测活动 符合条件 关闭活动
+                    $affMod = D('Affair');
+                    $canClose = $affMod->checkAffair($affairId);
+                    if($canClose) {
+                        $affMod->closeAffair($affairId);
                     }
+                    //检测活动 符合条件 关闭活动
+
+                    // 企业转账
+                    $redpackstatus = D('WxTrans')->WxTransfers($openid, $oneMoneyRes['money'], $order['title']);
+                    if($redpackstatus['status'] == true) {
+                        //增加支付记录
+                        $tsMod = D('Transaction');
+                        $tsData['open_id'] = $openid;
+                        $tsData['affair_id'] = $affairId;
+                        $tsData['type'] = 4;
+                        $tsData['cash_fee'] = $oneMoneyRes['money']*100;
+                        $tsData['total_fee'] = $oneMoneyRes['money']*100;
+                        $tsData['out_trade_no'] = $redpackstatus['data']['partner_trade_no'];
+                        $tsData['transaction_id'] = $redpackstatus['data']['payment_no'];
+                        $tsData['wx_response'] = $redpackstatus['data']['wx_response'];
+                        $tsMod->add($tsData);
+
+
+                    } else {
+                        $this->ajaxReturn('', $redpackstatus['info'], 403);
+                    }
+                    //企业转账
+
+                    $this->ajaxReturn('', '领取成功', 200);
                 } else {
-                    $this->ajaxReturn('', $redpackstatus['info'], 403);
+                    $this->ajaxReturn('', '领取失败', 403);
                 }
+
+
+
 
 
             } catch (Exception $e) {
