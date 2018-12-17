@@ -4,14 +4,21 @@
 // 本类由系统自动生成，仅供测试用途
 class IndexAction extends MyAction {
     public function index(){
+        reutn false;
         //echo Util::getHttpHeader(Constants::WX_HEADER_CODE);
-        echo WX_HEADER_CODE;
-    	$this->show('thanks');
+        // echo WX_HEADER_CODE;
+    	// $this->show('thanks');
+    }
+
+    public function fomrids()
+    {
+
     }
 
 
     public function test() {
-        $tranMod = new Model();
+        return false;
+        /*$tranMod = new Model();
         $msgMod = D('Message');
         $UserAffairMod = M('UserAffair');
         $tranMod->startTrans();
@@ -27,9 +34,7 @@ class IndexAction extends MyAction {
         } else {
             echo '回滚';
             $tranMod->rollback();
-        }
-
-
+        }*/
 
     }
 }
