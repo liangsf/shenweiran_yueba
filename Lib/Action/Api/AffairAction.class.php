@@ -372,9 +372,9 @@ class AffairAction extends MyAction {
                     }
               }
 
-              if($ufInfo['status']==2 && $ufInfo['hb_type'] == 0 && $current_time>$active_time && $afInfo['status'] == 0) {
-                  $btns['getMoney'] = true;
-              }
+              // if($ufInfo['status']==2 && $ufInfo['hb_type'] == 0 && $current_time>$active_time && $afInfo['status'] == 0) {
+              //     $btns['getMoney'] = true;
+              // }
 
               if($current_time>$active_time) {
                   $btns['view'] = true;

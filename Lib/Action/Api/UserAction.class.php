@@ -75,6 +75,7 @@ class UserAction extends MyAction {
     //领取红包  -- 领取红包（平分迟到的保证金）
     public function receiveCash($value='')
     {
+        return false;
         $affairId = intval($_POST['id']);
         $openid = $this->openid;
 

@@ -20,9 +20,9 @@ class MemberAction extends MyAction {
         $list = $ufModel->search($where, $page, $size);
         // echo M()->getLastSql();
 
-        if(strpos($rs['avatarurl'], 'http') === FALSE ) {
+        /*if(strpos($rs['avatarurl'], 'http') === FALSE ) {
             $rs['avatarurl'] = C('SITEURL').$rs['avatarurl'];
-        }
+        }*/
 
         foreach ($list as $key => $value) {
             if(strpos($value['avatarurl'], 'http') === FALSE ) {
@@ -228,7 +228,17 @@ class MemberAction extends MyAction {
                 $ufwhere['open_id'] = $this->openid;
                 if($current_time<$active_time) {
                     $updata['status'] = 2;
-                    $updata['pay_type'] = 2;
+                    //$updata['pay_type'] = 2;    //注释：改到管理员控制签到退款
+
+                    $upok = $ufMod->where($ufwhere)->save($updata);
+                    if($upok>0) {
+                        $this->ajaxReturn($upok, '签到成功', 200);
+                    } else {
+                        $this->ajaxReturn($upok, '签到失败', 200);
+                    }
+
+
+                    /*
                     //执行退款
                     $payMod = D('Pay');
 
@@ -242,22 +252,22 @@ class MemberAction extends MyAction {
                     $pay_resault = $payMod->refund($info['out_trade_no'], $info);
                     //执行退款
                     if($pay_resault['status']) {
-                        $updata['refund_money'] = $info['refund_fee'];
+                        $updata['refund_money'] = $info['refund_fee'];  //退款金额 后续退款在设置
                         $upok = $ufMod->where($ufwhere)->save($updata);
 
 
                         //检测活动 符合条件 关闭活动
-                        /*$affMod = D('Affair');
-                        $canClose = $affMod->checkAffair($affairId);
-                        if($canClose) {
-                            $affMod->closeAffair($affairId);
-                        }确定不了人数 不可以进行关闭*/
+                        // $affMod = D('Affair');
+                        // $canClose = $affMod->checkAffair($affairId);
+                        // if($canClose) {
+                        //     $affMod->closeAffair($affairId);
+                        // }确定不了人数 不可以进行关闭
                         //检测活动 符合条件 关闭活动
 
                         $this->ajaxReturn($upok, '签到成功', 200);
                     } else {
                         $this->ajaxReturn($upok, $pay_resault['info'], 403);
-                    }
+                    }*/
 
                 } else {
                     $updata['status'] = 3;
