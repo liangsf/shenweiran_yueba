@@ -109,7 +109,9 @@ class WxPayConfig
 	 */
 	public function GetSSLCertPath(&$sslCertPath, &$sslKeyPath)
 	{
-		$sslCertPath = '../../../cert/apiclient_cert.pem';
-		$sslKeyPath = '../../../cert/apiclient_key.pem';
+		// $sslCertPath = '../../../cert/apiclient_cert.pem';
+		// $sslKeyPath = '../../../cert/apiclient_key.pem';
+		$sslCertPath = "D:\wamp\www\dong\code\cert\apiclient_cert.pem";
+		$sslKeyPath = "D:\wamp\www\dong\code\cert\apiclient_key.pem";
 	}
 }
