@@ -2,6 +2,7 @@ Common
 Conf
 demo
 Lib/Action/Back/MyAction.class.php
+Lib/Action/Back/TestAction.class.php
 php_sdk_v3.0.9
 Runtime
 Tpl
