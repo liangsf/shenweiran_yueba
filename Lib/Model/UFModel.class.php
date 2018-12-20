@@ -205,16 +205,19 @@ class UFModel extends CommonModel {
 
 	}
 
+	//获取参会人员列表
 	public function getAllStatus($id)
 	{
 		$sub['signCount'] = 0;
+		$sub['signNoBack'] = 0;
 		$sub['joinCount'] = 0;
 		$sub['redpackCount'] = 0;
 		$sub['lateCount'] = 0;
 		$sub['joinList'] = [];
 		$sub['signList'] = [];
 		$sub['signNoPackList'] = [];
-
+		$sub['signPackList'] = [];
+		$sub['signNoBackList'] = [];
 
 		$w['affair_id'] = $id;
 		$join_affair_list = $this->where($w)->select();
@@ -222,6 +225,12 @@ class UFModel extends CommonModel {
 
 			if($v['status'] == 2) {
 				$sub['signCount']++;
+				$sub['signList'][] = $v;
+			}
+
+			if($v['status'] == 2 && $v['pay_type'] == 1) {
+				$sub['signNoBack']++;
+				$sub['signNoBackList'][] = $v;
 			}
 
 			if($v['status'] > 0) {
@@ -231,10 +240,11 @@ class UFModel extends CommonModel {
 
 			if($v['status'] ==2 && $v['hb_type'] == 1) {
 				$sub['redpackCount']++;
+				$sub['signPackList'][] = $v;
 			}
 
 			if($v['status'] ==2 && $v['hb_type'] == 0) {
-				$sub['signNoPackList']++;
+				$sub['signNoPackList'][] = $v;
 			}
 
 			if($v['status'] == 1 || $v['status'] == 3) {
@@ -245,5 +255,43 @@ class UFModel extends CommonModel {
 		return $sub;
 
 	}
+
+	/**
+     * [refundPromise 给活动参会人员退款]
+     * @param  integer $id    [活动id]
+     * @param  [type]  $money [退款金额]
+     * @return [type]         [description]
+     */
+    public function refundPromise($id=0, $money=0)
+    {
+        $payMod = D('Pay');
+        $list = $this->getAllStatus($id);
+        $result = true;
+        try {
+            if( count($list['signNoBackList']) > 0 ) {
+                foreach( $list['signNoBackList'] as $k=>$v ) {
+                    $v['promise_money'] = $v['order_money'];
+                    $v['refund_fee'] = $money;
+                    $v['id'] = $v['affair_id'];
+                    $pay_resault = $payMod->refund($v['out_trade_no'], $v);
+                    if($pay_resault['status']) {
+                        $updata['refund_money'] = $money;  //退款金额 后续退款在设置
+                        $updata['pay_type'] = 2;
+                        $ufwhere['affair_id'] = $v['affair_id'];
+                        $ufwhere['open_id'] = $v['open_id'];
+                        $upok = $this->where($ufwhere)->save($updata);
+                    } else {
+                        //$pay_resault['info']
+                        $result = false;
+                    }
+                }
+            }
+
+        } catch (Exception $e) {
+            $result = false;
+        }
+
+        return $result;
+    }
 
 }

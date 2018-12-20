@@ -67,7 +67,8 @@ class NotifyAction extends Action {
         $ufData['pay_time'] = date('Y-m-d H:i:s', time());
         $ufWhere['out_trade_no'] = $data['out_trade_no'];
         $ufWhere['open_id'] = $data['openid'];
-        $ufWhere['status'] = 1;
+        //$ufWhere['status'] = 1;
+        $ufWhere['pay_type'] = 0;
         $ok = D('UF')->where($ufWhere)->save($ufData);
 
         if($ok) {

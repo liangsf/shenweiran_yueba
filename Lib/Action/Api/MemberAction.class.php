@@ -54,6 +54,30 @@ class MemberAction extends MyAction {
         $res['red_pack_count'] = 0;  //总红包个数
         $res['get_red_pack_count'] = 0;  //领取红包个数
 
+        $ufMod = D('UF');
+
+        /*$afInfo = D('Affair')->find($id);
+
+        $countArr = $ufMod->getAllStatus($id);
+        $res['join_sign'] = $countArr['signList'];
+        $res['join'] = $countArr['joinList'];
+        $res['get_red_pack'] = $countArr['signPackList'];
+        $res['not_get_red_pack'] = $countArr['signNoPackList'];
+        $res['join_count'] = count($res['join'])-$countArr['lateCount'];
+        $res['join_sign_count'] = count($res['join_sign']);
+        $res['sign_money'] = $res['join_count']*$afInfo['promise_money']/100;     //----wt
+        $res['late_money'] = $countArr['lateCount']*$afInfo['promise_money'];
+        if($countArr['lateCount']==0) {
+            $res['red_pack_count'] = 0;
+        } else {
+            $res['red_pack_count'] = count($res['join_sign']);  //总红包个数
+        }
+        $res['get_red_pack_count'] = count($res['get_red_pack']);
+
+        $this->ajaxReturn($res, 'ok', 200);*/
+
+
+
         $where['t.affair_id'] = intval($id);
         $transList = D('Transaction')->search($where);
         //echo M()->getLastSql();
@@ -102,11 +126,11 @@ class MemberAction extends MyAction {
         }
 
 
-        $res['join_count'] = count($res['join']);   //准时红包总个数
+        $res['join_count'] = count($res['join'])-$latePersonCount;//count($res['join']);   //准时红包总个数
         $res['join_sign_count'] = count($res['join_sign']);     //已领准时退款红包个数
         $res['sign_money'] = $res['join_count']*$promise_money/100; //签到准时红包总金额
         $res['late_money'] = $latePersonCount*$afInfo['promise_money']; //总迟到红包金额
-        if($latePersonCount!=0) {
+        if($latePersonCount==0) {
             $res['red_pack_count'] = 0;
         } else {
             $res['red_pack_count'] = count($res['join_sign']);  //总红包个数

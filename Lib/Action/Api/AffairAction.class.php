@@ -301,6 +301,204 @@ class AffairAction extends MyAction {
         // $pay_resault = $payMod->refund($info['out_trade_no'], $info);
     }
 
+
+    /**
+     * [closeAffair 关闭活动，设置人员签到签到情况、退还保证金、分发红包]
+     * @param  [type] $id [活动id]
+     * @return [type]     [description]
+     */
+    public function orgerCloseAffair()
+    {
+        $id = intval($_POST['id']);
+        $persons = json_decode($_POST['users'], true); //迟到人列表
+
+        // file_put_contents('./log.txt',json_encode($data) , FILE_APPEND);
+        // exit;
+
+        $id = intval($id);
+        $affMod = D('Affair');
+        $afWhere['id'] = $id;
+        $afWhere['open_id'] = $this->openid;
+        $afInfo = $affMod->where($afWhere)->find();
+
+        //确认是活动创建者
+        //活动已开始且活动进行中的才可以处理
+        if(!$afInfo) {
+            $this->ajaxReturn('', '您不是组织者', 402);
+        }
+
+        if( $afInfo['status'] != 0 ) {
+            $this->ajaxReturn('', '活动已结束', 402);
+        }
+
+        $current_date = date('Y-m-d H:i:s', time());
+        if( $afInfo['active_time'] > $current_date) {
+            $this->ajaxReturn('', '活动还没有开始', 402);
+        }
+
+        $signList = array();    //签到的人
+        $lateList = array();    //迟到的人
+        if( is_array($persons) && count($persons) > 0 ) {
+            foreach($persons as $k=>$v) {
+                if(intval($v['type']) == 1) {
+                    $signList[] = $v;
+                } else {
+                    $lateList[] = $v;
+                }
+            }
+        } else {
+            $this->ajaxReturn('', '请勾选参会人', 402);
+        }
+
+        $ufMod = D('UF');
+
+
+        //$openidArr = explode(',', $openids);
+        //设置用户签到状态
+        if( count($persons) >0 && is_array($persons) ) {
+
+            $tranMod = new Model();
+            $tranMod->startTrans();
+
+            $upstatus = true;
+            foreach( $persons as $k=>$v) {
+                if(intval($v['type']) == 1) {
+                    //设置签到
+                    $w['open_id'] = strval($v['open_id']);
+                    $w['affair_id'] = $id;
+                    $ufData['status'] = 2;
+                    $ufData['sign_time'] = date('Y-m-d H:i:s', time());
+                    $ok = $ufMod->where($w)->save($ufData);
+                    if($ok<1) {
+                        $upstatus = false;
+                    }
+                } else{
+                    //设置迟到
+                    $w['open_id'] = strval($v['open_id']);
+                    $w['affair_id'] = $id;
+                    $ufData['status'] = 3;
+                    $ufData['sign_time'] = date('Y-m-d H:i:s', time());
+                    $ok = $ufMod->where($w)->save($ufData);
+                    if($ok<1) {
+                        $upstatus = false;
+                    }
+                }
+
+            }
+
+            if( $upstatus == true ) {
+                $tranMod->commit();
+            } else {
+                $tranMod->rollback();
+                $this->ajaxReturn('', '操作失败', 402);
+            }
+        }
+
+
+
+
+        $payMod = D('Pay');
+        $base_info = M('BaseConf')->where('id=1')->find();
+
+        $signCount = count($signList);
+        $lateCount = count($lateList);
+
+        if($signCount == 0) {
+            //都迟到退款的扣除比例
+            $backRate = $base_info['all_late_rate'];
+        }
+        if($lateCount == 0) {
+            //都签到退款的扣除比例
+            $backRate = $base_info['join_fl'];
+        }
+
+        if($signCount !=0 && $lateCount != 0) {
+            //分钱的扣除比例
+            $packRate = $base_info['out_fl'];
+        }
+
+
+
+        $cutMoney = $afInfo['promise_money']*$backRate/100;
+        $afInfo['refund_fee'] = $afInfo['promise_money']-$cutMoney;
+        $back_money = sprintf("%.2f",$afInfo['refund_fee']);
+
+        //退款 start
+        $reback_status = true;
+        $back_res = $ufMod->refundPromise($id, $back_money);
+        if(!$back_res) {
+            //退款有失败
+            $reback_status = false;
+        }
+        //退款 end
+
+        //分发红包 start
+        $red_pack_status = true;
+        if($signCount !=0 && $lateCount != 0) {
+
+            $cutPackMoney = $afInfo['promise_money']*$packRate/100;
+            $red_money = $afInfo['promise_money']*$lateCount-$cutPackMoney;
+            $send_red_money = $red_money/$signCount;
+            $send_red_money = sprintf("%.2f",$send_red_money);
+
+
+            $tsMod = D('Transaction');
+            $wtMod = D('WxTrans');
+            foreach($signList as $k=>$v) {
+
+                $data['hb_type'] = 1;
+                $data['red_money'] = $send_red_money;
+                $data['hb_time'] = date('Y-m-d H:i:s', time());
+                $where['affair_id'] = $id;
+                $where['open_id'] = $v['open_id'];
+                $where['status'] = 2;
+                $where['hb_type'] = 0;
+                $isOk = $ufMod->where($where)->save($data);
+
+                if($isOk) {
+                    $redpackstatus = $wtMod->WxTransfers($v['open_id'], $send_red_money, $afInfo['title']);
+                    if($redpackstatus['status'] == true) {
+                        //增加支付记录
+                        $tsData['open_id'] = $v['open_id'];
+                        $tsData['affair_id'] = $id;
+                        $tsData['type'] = 4;
+                        $tsData['cash_fee'] = $send_red_money*100;
+                        $tsData['total_fee'] = $send_red_money*100;
+                        $tsData['out_trade_no'] = $redpackstatus['data']['partner_trade_no'];
+                        $tsData['transaction_id'] = $redpackstatus['data']['payment_no'];
+                        $tsData['wx_response'] = $redpackstatus['data']['wx_response'];
+                        $tsMod->add($tsData);
+                    } else {
+                        $red_pack_status = false;   //企业转账失败
+                    }
+                } else {
+                    $red_pack_status = false;
+                }
+
+            }
+
+
+        }
+
+        //分发红包 end
+
+
+        //关闭活动
+        if($red_pack_status && $reback_status) {
+            $js_data['status'] = 1;
+            $affMod->where($afWhere)->save($js_data);
+            $this->ajaxReturn('', '分配成功', 200);
+        } else {
+            $this->ajaxReturn('', '红包发放中', 200);
+        }
+
+
+
+    }
+
+
+
+
     //操作按钮
     public function getOptBtn()
     {
