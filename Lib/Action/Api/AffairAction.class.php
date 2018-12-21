@@ -236,6 +236,9 @@ class AffairAction extends MyAction {
         $affInfo = $affairMod->where($affWhere)->find();
         $active_time = strtotime($affInfo['active_time']);
         $current_time = time();
+        if( ($current_time+7200) > $active_time ) {
+            $this->ajaxReturn('', '活动已开始签到不可以取消', 402);
+        }
         if($current_time>$active_time) {
             $this->ajaxReturn('', '活动已开始不可以取消', 402);
         }
