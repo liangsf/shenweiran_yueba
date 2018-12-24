@@ -43,16 +43,17 @@ class MemberAction extends MyAction {
         $id = intval($id);
 
         $res = array();
-        $res['join_sign'] = []; //签到并领取准时红包的人员列表
-        $res['join'] = []; //所有参与人列表
-        $res['get_red_pack'] = []; //已领取红包的人员列表
-        $res['not_get_red_pack'] = []; //未领取红包的人员列表
+        $res['join_sign'] = array(); //签到并领取准时红包的人员列表
+        $res['join'] = array(); //所有参与人列表
+        $res['get_red_pack'] = array(); //已领取红包的人员列表
+        $res['not_get_red_pack'] = array(); //未领取红包的人员列表
         $res['join_count'] = 0; //准时红包总个数
         $res['join_sign_count'] = 0;     //已领准时退款红包个数
         $res['sign_money'] = 0; //签到准时红包总金额
         $res['late_money'] = 0; //总迟到红包金额
         $res['red_pack_count'] = 0;  //总红包个数
         $res['get_red_pack_count'] = 0;  //领取红包个数
+        $res['out_fl'] = 0;  //领取红包个数
 
         $ufMod = D('UF');
 
@@ -88,7 +89,7 @@ class MemberAction extends MyAction {
         $afInfo = D('Affair')->find($id);
 
         $promise_money = 0;
-        $res = array();
+        //$res = array();
         foreach($transList as $k=>$v) {
 
             if(strpos($v['avatarurl'], 'http') === FALSE ) {

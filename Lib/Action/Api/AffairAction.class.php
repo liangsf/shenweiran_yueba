@@ -70,6 +70,9 @@ class AffairAction extends MyAction {
         //$personList = $this->getJoinAffairPersonCount($id, 1);    //获取所有报名成功的人
         //$info['all_promise_money'] = $info['promise_money']*count($personList);
 
+        //获取创建人基本信息
+        $user = M('WxUsers')->where(array('open_id'=> $info['open_id']))->find();
+        //获取创建人基本信息
 
 
         //获取提醒时间
@@ -80,6 +83,9 @@ class AffairAction extends MyAction {
         $info['notice'] = $noticeRs['notice'];
 
         $info = $this->getWaitAllot($info, false);
+
+        $info['userName'] = $user['name'];
+        $info['nickname'] = $user['nickname'];
 
         $this->ajaxReturn($info, 'ok', 200);
     }
