@@ -55,6 +55,9 @@ class MemberAction extends MyAction {
         $res['get_red_pack_count'] = 0;  //领取红包个数
         $res['out_fl'] = 0;  //领取红包个数
 
+        $baseInfo = M('BaseConf')->where('id=1')->find();   //获取退款费率
+        $res['out_fl'] = $baseInfo['out_fl'];
+
         $ufMod = D('UF');
 
         /*$afInfo = D('Affair')->find($id);
